@@ -1,14 +1,20 @@
 # app.py
-from flask import Flask, render_template_string, request
+import io
+from flask import Flask, render_template_string, request, render_template
 import mlflow.pyfunc
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.use('Agg')  # Importante para evitar GUI
+import base64
 
 app = Flask(__name__)
 
 # Cargar el modelo desde el registro de MLflow
 mlflow.set_tracking_uri("http://localhost:9090")
-model = mlflow.sklearn.load_model("models:/Heart_desease_prediction/2")
+model = mlflow.sklearn.load_model("models:/Heart_desease_prediction/3")
 
 app = Flask(__name__)
 
@@ -16,107 +22,16 @@ app = Flask(__name__)
 # Ruta de inicio descriptiva
 @app.route("/home")
 def home():
-    return "<h2>Bienvenido al sistema de predicción de enfermedades cardíacas</h2><p>Ir a <a href='/predict'>/predict</a> para realizar una predicción.</p>"
+    return render_template("home.html")
 
 
 # Formulario para ingresar los datos
-@app.route("/predict", methods=["GET"])
+@app.route("/predict", methods=["GET", "POST"])
 def predict_form():
-    return render_template_string("""
-    <h2>Formulario de Predicción de Enfermedad Cardíaca</h2>
-    <form method="post" action="/result">
-        <label>Edad:</label><input type="number" name="age" required><br><br>
-        
-        <label>Sexo:</label>
-        <select name="sex">
-            <option value="1">Hombre</option>
-            <option value="0">Mujer</option>
-        </select><br><br>
-        
-        <label>Tipo de dolor torácico (cp):</label>
-        <select name="cp">
-            <option value="0">Tipo 0</option>
-            <option value="1">Tipo 1</option>
-            <option value="2">Tipo 2</option>
-            <option value="3">Tipo 3</option>
-        </select><br><br>
-
-        <label>Presión en reposo (trestbps):</label><input type="number" name="trestbps" required><br><br>
-        <label>Colesterol (chol):</label><input type="number" name="chol" required><br><br>
-        
-        <label>Glucemia en ayunas > 120 mg/dl (fbs):</label>
-        <select name="fbs">
-            <option value="1">Sí</option>
-            <option value="0">No</option>
-        </select><br><br>
-
-        <label>Resultado ECG en reposo (restecg):</label>
-        <select name="restecg">
-            <option value="0">Normal</option>
-            <option value="1">Anormalidad ST-T</option>
-            <option value="2">Hipertrofia ventricular izquierda</option>
-        </select><br><br>
-
-        <label>Frecuencia cardíaca máxima (thalach):</label><input type="number" name="thalach" required><br><br>
-        <label>Angina inducida por ejercicio (exang):</label>
-        <select name="exang">
-            <option value="1">Sí</option>
-            <option value="0">No</option>
-        </select><br><br>
-
-        <label>Oldpeak:</label><input type="number" step="0.1" name="oldpeak" required><br><br>
-        <label>Pendiente del ST (slope):</label>
-        <select name="slope">
-            <option value="0">Tipo 0</option>
-            <option value="1">Tipo 1</option>
-            <option value="2">Tipo 2</option>
-        </select><br><br>
-        <label>Número de vasos (ca):</label>
-        <select name="ca">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-        </select><br><br>
-        <label>Thal:</label>
-        <select name="thal">
-            <option value="0">Normal</option>
-            <option value="1">Defecto fijo</option>
-            <option value="2">Defecto reversible</option>
-        </select><br><br>
-
-        <h4>Estilo de vida</h4>
-
-        <label>Actividad física:</label>
-        <select name="physical_activity">
-            <option value="baja">Baja</option>
-            <option value="moderada">Moderada</option>
-            <option value="alta">Alta</option>
-        </select><br><br>
-
-        <label>¿Fuma?:</label>
-        <select name="smoking_status">
-            <option value="no fuma">No</option>
-            <option value="fuma">Sí</option>
-        </select><br><br>
-
-        <label>Consumo de alcohol:</label>
-        <select name="alcohol_intake">
-            <option value="bajo">Bajo</option>
-            <option value="medio">Medio</option>
-            <option value="alto">Alto</option>
-        </select><br><br>
-
-        <label>Calidad de la dieta:</label>
-        <select name="diet_quality">
-            <option value="pobre">Pobre</option>
-            <option value="regular">Regular</option>
-            <option value="buena">Buena</option>
-        </select><br><br>
-
-        <input type="submit" value="Predecir">
-    </form>
-    """)
+    if request.method == "POST":
+        # Procesar los datos del formulario
+        ...
+    return render_template("predict.html")
 
 
 # Ruta para procesar predicción
@@ -139,35 +54,81 @@ def result():
         'slope': int(data['slope']),
         'ca': int(data['ca']),
         'thal': int(data['thal']),
+        'physical_activity': data['physical_activity'] == 'true',
+        'smoking_status': data['smoking_status'] == 'true',
+        'alcohol_intake': data['alcohol_intake'] == 'true',
+        'diet_quality': data['diet_quality'] == 'true'
     }
-
-    # Variables codificadas de estilo de vida
-    features.update({
-        'physical_activity_baja': data['physical_activity'] == 'baja',
-        'physical_activity_moderada': data['physical_activity'] == 'moderada',
-        'smoking_status_no fuma': data['smoking_status'] == 'no fuma',
-        'alcohol_intake_bajo': data['alcohol_intake'] == 'bajo',
-        'alcohol_intake_medio': data['alcohol_intake'] == 'medio',
-        'diet_quality_pobre': data['diet_quality'] == 'pobre',
-        'diet_quality_regular': data['diet_quality'] == 'regular',
-    })
 
     # Asegurar el orden de columnas como el del modelo entrenado
     ordered_cols = [
         'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach',
-        'exang', 'oldpeak', 'slope', 'ca', 'thal', 'physical_activity_baja',
-        'physical_activity_moderada', 'smoking_status_no fuma',
-        'alcohol_intake_bajo', 'alcohol_intake_medio', 'diet_quality_pobre',
-        'diet_quality_regular'
+        'exang', 'oldpeak', 'slope', 'ca', 'thal', 'physical_activity',
+        'smoking_status', 'alcohol_intake', 'diet_quality'
     ]
 
     input_df = pd.DataFrame([features])[ordered_cols]
 
     # Realizar predicción
     prediction = model.predict(input_df)[0]
+    # En tu vista Flask o en el código de prueba
+    proba = model.predict_proba(input_df)[0][1]
+    # En tu vista Flask o en el código de prueba
+    print(f"Probabilidad estimada de enfermedad cardíaca: {proba:.2f}")
+
     resultado = "Positivo (riesgo de enfermedad cardíaca)" if prediction == 1 else "Negativo (sin riesgo detectable)"
 
-    return f"<h3>Resultado de la predicción: {resultado}</h3><p><a href='/predict'>Volver al formulario</a></p>"
+    # Variables clínicas seleccionadas
+    clinical_vars = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak']
+    clinical_min_max = {
+        'age': (29, 77),
+        'trestbps': (94, 200),
+        'chol': (126, 564),
+        'thalach': (71, 202),
+        'oldpeak': (0.0, 6.2)
+    }
+    clinical_values = [(features[v] - clinical_min_max[v][0]) /
+                       (clinical_min_max[v][1] - clinical_min_max[v][0])
+                       for v in clinical_vars]
+
+    # Estilo de vida agrupado
+    lifestyle_vars = ['Actividad física', 'Fumador', 'Alcohol', 'Dieta']
+    lifestyle_values = [
+        1 if features['physical_activity'] else 0,
+        1 if features['smoking_status'] else 0,
+        1 if features['alcohol_intake'] else 0,
+        1 if features['diet_quality'] else 0
+    ]
+
+    radar_clinical = plot_radar(clinical_vars.copy(), clinical_values.copy(),
+                                "Variables Clínicas")
+    radar_lifestyle = plot_radar(lifestyle_vars.copy(),
+                                 lifestyle_values.copy(), "Estilo de Vida")
+
+    return render_template("result.html",
+                           resultado=resultado,
+                           probabilidad=proba,
+                           radar_clinical=radar_clinical,
+                           radar_lifestyle=radar_lifestyle)
+
+
+def plot_radar(labels, values, title):
+    labels += [labels[0]]
+    values += [values[0]]
+    angles = [n / float(len(labels)) * 2 * np.pi for n in range(len(labels))]
+    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
+    ax.plot(angles, values, 'o-', linewidth=2)
+    ax.fill(angles, values, alpha=0.25)
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels[:-1])
+    ax.set_yticklabels([])
+    ax.set_title(title, y=1.1)
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format="png")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode('utf-8')
 
 
 if __name__ == "__main__":

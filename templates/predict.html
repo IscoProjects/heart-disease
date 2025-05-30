@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predicción</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body
+    class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-6"
+  >
+    <div class="w-full max-w-3xl bg-white shadow-md rounded-lg p-6 mt-6">
+      <h1 class="text-2xl font-bold mb-4 text-center">
+        Formulario de Predicción de Enfermedad Cardíaca
+      </h1>
+      <form action="{{ url_for('result') }}" method="POST" class="space-y-6">
+        <!-- Sección: Información Clínica -->
+        <div>
+          <h2 class="text-xl font-semibold mb-2 text-gray-700">
+            Información Clínica
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block">Edad</label>
+              <input
+                type="number"
+                name="age"
+                min="29"
+                max="77"
+                required
+                class="w-full p-2 border rounded"
+                placeholder="29 - 77"
+              />
+            </div>
+            <div>
+              <label class="block">Sexo</label>
+              <select name="sex" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">Femenino</option>
+                <option value="1">Masculino</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Tipo de dolor torácico</label>
+              <select name="cp" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">Típico anginoso</option>
+                <option value="1">Atípico anginoso</option>
+                <option value="2">No anginoso</option>
+                <option value="3">Asintomático</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Presión en reposo (mmHg)</label>
+              <input
+                type="number"
+                name="trestbps"
+                min="90"
+                max="200"
+                required
+                class="w-full p-2 border rounded"
+                placeholder="Ej: 120"
+              />
+            </div>
+            <div>
+              <label class="block">Colesterol (mg/dl)</label>
+              <input
+                type="number"
+                name="chol"
+                min="100"
+                max="600"
+                required
+                class="w-full p-2 border rounded"
+                placeholder="Ej: 250"
+              />
+            </div>
+            <div>
+              <label class="block">Glucemia en ayunas &gt; 120 mg/dl</label>
+              <select name="fbs" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Electrocardiograma en reposo</label>
+              <select name="restecg" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">Normal</option>
+                <option value="1">Anomalías</option>
+                <option value="2">Hipertrofia ventricular</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Frecuencia cardíaca máxima</label>
+              <input
+                type="number"
+                name="thalach"
+                min="70"
+                max="210"
+                required
+                class="w-full p-2 border rounded"
+                placeholder="Ej: 150"
+              />
+            </div>
+            <div>
+              <label class="block">Angina inducida por ejercicio</label>
+              <select name="exang" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Oldpeak (depresión ST)</label>
+              <input
+                type="number"
+                name="oldpeak"
+                min="0"
+                max="6"
+                step="0.1"
+                required
+                class="w-full p-2 border rounded"
+                placeholder="Ej: 1.4"
+              />
+            </div>
+            <div>
+              <label class="block">Pendiente del ST</label>
+              <select name="slope" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">Ascendente</option>
+                <option value="1">Plana</option>
+                <option value="2">Descendente</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Nº de vasos principales</label>
+              <select name="ca" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Talasemia</label>
+              <select name="thal" required class="w-full p-2 border rounded">
+                <option value="">Seleccione...</option>
+                <option value="0">Normal</option>
+                <option value="1">Defecto fijo</option>
+                <option value="2">Defecto reversible</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Estilo de Vida -->
+        <div>
+          <h2 class="text-xl font-semibold mb-2 text-gray-700">
+            Factores de Estilo de Vida
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block">Realiza actividad física</label>
+              <select
+                name="physical_activity"
+                required
+                class="w-full p-2 border rounded"
+              >
+                <option value="">Seleccione...</option>
+                <option value="false">No</option>
+                <option value="true">Si</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Fuma</label>
+              <select
+                name="smoking_status"
+                required
+                class="w-full p-2 border rounded"
+              >
+                <option value="">Seleccione...</option>
+                <option value="false">No</option>
+                <option value="true">Si</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Ingiere alcohol</label>
+              <select
+                name="alcohol_intake"
+                required
+                class="w-full p-2 border rounded"
+              >
+                <option value="">Seleccione...</option>
+                <option value="false">No</option>
+                <option value="true">Si</option>
+              </select>
+            </div>
+            <div>
+              <label class="block">Mantiene dieta saludable</label>
+              <select
+                name="diet_quality"
+                required
+                class="w-full p-2 border rounded"
+              >
+                <option value="">Seleccione...</option>
+                <option value="false">No</option>
+                <option value="true">Si</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de envío -->
+        <div class="text-center">
+          <button
+            type="submit"
+            class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          >
+            Predecir Riesgo
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

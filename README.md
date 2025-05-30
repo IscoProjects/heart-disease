@@ -32,7 +32,7 @@ Se combinaron dos fuentes de datos:
 1. **Heart Disease Dataset (CSV):** Información clínica de pacientes como edad, presión arterial, colesterol, etc.
 2. **Lifestyle Heart Risk Dataset (SQLite):** Factores de estilo de vida como actividad física, tabaquismo, alcohol e índice de dieta.
 
-Las variables de estilo de vida fueron codificadas como binarias (`True`/`False`) para integrarse con los datos clínicos.
+Las variables de estilo de vida se integraron con los datos clínicos.
 
 ---
 
@@ -42,11 +42,11 @@ Se entrenaron y evaluaron los siguientes modelos:
 
 | Modelo              | Accuracy | Precision | Recall | F1 Score |
 | ------------------- | -------- | --------- | ------ | -------- |
-| Random Forest       | 0.995    | 1.000     | 0.990  | 0.995    |
-| Decision Tree       | 0.976    | 0.981     | 0.971  | 0.976    |
-| SVM                 | 0.888    | 0.866     | 0.924  | 0.894    |
-| Logistic Regression | 0.829    | 0.792     | 0.905  | 0.844    |
-| KNN                 | 0.805    | 0.760     | 0.905  | 0.826    |
+| Random Forest       | 0.980    | 0.962     | 1.000  | 0.980    |
+| SVM                 | 0.886    | 0.857     | 0.932  | 0.893    |
+| Logistic Regression | 0.881    | 0.849     | 0.932  | 0.888    |
+| Decision Tree       | 0.871    | 0.873     | 0.873  | 0.873    |
+| KNN                 | 0.856    | 0.824     | 0.912  | 0.866    |
 
 **Random Forest** fue seleccionado como el mejor modelo.
 
